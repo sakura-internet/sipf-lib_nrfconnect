@@ -58,6 +58,7 @@ int SipfObjectCreateObjUpPayload(uint8_t *raw_buff, uint16_t sz_raw_buff, SipfOb
         raw_buff[idx_raw_buff++] = objs[i].obj_type;
         raw_buff[idx_raw_buff++] = objs[i].obj_tagid;
         raw_buff[idx_raw_buff++] = objs[i].value_len;
+
         switch (objs[i].obj_type) {
         case OBJ_TYPE_UINT8:
         case OBJ_TYPE_INT8:
@@ -73,16 +74,15 @@ int SipfObjectCreateObjUpPayload(uint8_t *raw_buff, uint16_t sz_raw_buff, SipfOb
                 // データ長が偶数じゃない
                 return -1;
             }
-            for (int j = 0; j < (objs[i].value_len / 2); j++) {
+            for (int j = 0; j < objs[i].value_len; j++) {
                 work[j] = objs[i].value[objs[i].value_len - j - 1];
             }
-            //memcpy(&raw_buff[idx_raw_buff], work, objs[i].value_len);
+            memcpy(&raw_buff[idx_raw_buff], work, objs[i].value_len);
             idx_raw_buff += objs[i].value_len;
-            break;    
+            break;
         }
     }
-    LOG_HEXDUMP_INF(raw_buff, idx_raw_buff, "raw_buff:");
-    return idx_raw_buff;    // バッファに書いたデータ長を返す
+    return idx_raw_buff; // バッファに書いたデータ長を返す
 }
 
 /** SIPF_OBJクライアント  **/
