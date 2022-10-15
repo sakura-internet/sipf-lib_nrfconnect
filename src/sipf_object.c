@@ -177,11 +177,11 @@ int SipfObjClientObjUpRaw(uint8_t *payload_buffer, uint16_t size, SipfObjectOtid
 
     LOG_DBG("Response status %s", http_res.http_status);
     LOG_DBG("content-length: %d", http_res.content_length);
-    LOG_HEXDUMP_DBG(http_res.body_start, http_res.content_length, "response:");
+    LOG_HEXDUMP_DBG(http_res.body_frag_start, http_res.body_frag_len, "response:");
 
     // OBJID_NOTIFICATIONをパース
-    uint8_t *sipf_obj_head = &http_res.body_start[0];
-    uint8_t *sipf_obj_payload = &http_res.body_start[12];
+    uint8_t *sipf_obj_head = &http_res.body_frag_start[0];
+    uint8_t *sipf_obj_payload = &http_res.body_frag_start[12];
     if (strcmp(http_res.http_status, "OK") != 0) {
         LOG_WRN("Invalid HTTP stauts %s", http_res.http_status);
         if (strcmp(http_res.http_status, "Unauthorized") == 0) {
@@ -291,9 +291,10 @@ int SipfObjClientObjDown(SipfObjectOtid *otid, uint8_t *remains, uint8_t *objqty
 
     LOG_INF("Response status %s(%d)", http_res.http_status, http_res.http_status_code);
     LOG_INF("data_len: %d content-length: %d", http_res.data_len, http_res.content_length);
+    LOG_HEXDUMP_DBG(http_res.body_frag_start, http_res.body_frag_len, "response:");
     /* レスポンスを処理 */
-    uint8_t *sipf_obj_head = &http_res.body_start[0];
-    uint8_t *sipf_obj_payload = &http_res.body_start[12];
+    uint8_t *sipf_obj_head = &http_res.body_frag_start[0];
+    uint8_t *sipf_obj_payload = &http_res.body_frag_start[12];
     if (strcmp(http_res.http_status, "OK") != 0) {
         if (strcmp(http_res.http_status, "Unauthorized") == 0) {
             return -401;
