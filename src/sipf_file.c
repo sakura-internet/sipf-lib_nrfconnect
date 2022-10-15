@@ -99,7 +99,7 @@ static int sipfFileRequestURL(enum req_url_type req_type, const char *file_id, c
         return -1;
     }
 
-    strncpy(url, http_res.body_start, http_res.content_length);
+    strncpy(url, http_res.body_frag_start, http_res.content_length);
     LOG_HEXDUMP_INF(url, http_res.content_length, "url:");
     return http_res.content_length;
 }
@@ -397,7 +397,7 @@ int SipfFileDownload(const char *file_id, uint8_t *buff, size_t sz_download, sip
 
     // Download Clientの設定
     struct download_client_cfg config = {
-        .sec_tag = sec_tag, .apn = NULL, .frag_size_override = sz_download, .set_tls_hostname = (sec_tag != -1),
+        .sec_tag = sec_tag, .pdn_id = 0, .frag_size_override = sz_download, .set_tls_hostname = (sec_tag != -1),
     };
 
     // Download Client初期化
