@@ -216,27 +216,12 @@ int SipfObjClientObjUpRaw(uint8_t *payload_buffer, uint16_t size, SipfObjectOtid
 
 int SipfObjClientObjUp(const SipfObjectUp *simp_obj_up, SipfObjectOtid *otid)
 {
-    if (simp_obj_up->obj.value == NULL) {
+    if (simp_obj_up->objs == NULL){
         return -1;
     }
 
-    uint16_t size = 3 + simp_obj_up->obj.value_len;
-    uint8_t payload[32];
-    if (size > sizeof(payload)) {
-        LOG_ERR("obj.value is too big %d", size);
-        return -1;
-    }
-
-    // OBJ
-    //  OBJ_TYPEID
-    payload[0] = simp_obj_up->obj.obj_type;
-    //  OBJ_TAGID
-    payload[1] = simp_obj_up->obj.obj_tagid;
-    //  OBJ_LENGTH
-    payload[2] = simp_obj_up->obj.value_len;
-    //  OBJ_VALUE
-    memcpy(&payload[3], simp_obj_up->obj.value, simp_obj_up->obj.value_len);
-
+    uint8_t payload[512];
+    int size = SipfObjectCreateObjUpPayload(payload, sizeof(payload), simp_obj_up->objs, simp_obj_up->obj_qty);
     return SipfObjClientObjUpRaw(payload, size, otid);
 }
 
