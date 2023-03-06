@@ -3,13 +3,13 @@
  *
  * SPDX-License-Identifier: MIT
  */
-#include <logging/log.h>
+#include <zephyr/logging/log.h>
 
 LOG_MODULE_DECLARE(sipf);
 
 #include <stdio.h>
 #include <string.h>
-#include <zephyr.h>
+//#include <zephyr/zephyr.h>
 
 #include "sipf/sipf_client_http.h"
 #include "sipf/sipf_file.h"
