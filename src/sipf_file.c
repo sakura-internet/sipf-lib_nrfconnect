@@ -80,7 +80,12 @@ static int sipfFileRequestURL(enum req_url_type req_type, const char *file_id, c
 
     /* リクエストするよ */
     static struct http_response http_res;
-    ret = SipfClientHttpRunRequest(CONFIG_SIPF_FILE_REQ_URL_HOST, &req, 3 * MSEC_PER_SEC, &http_res, false /*true*/);
+#ifndef CONFIG_SIPF_CONNECTOR_DISABLE_SSL
+    bool ssl = true;
+#else
+    bool ssl = false;
+#endif
+    ret = SipfClientHttpRunRequest(CONFIG_SIPF_FILE_REQ_URL_HOST, &req, 3 * MSEC_PER_SEC, &http_res, ssl);
     LOG_DBG("SipfClientHttpRunRequest(): %d", ret);
     if (ret < 0) {
         LOG_ERR("SipfClientHttpRunRequest() failed.");
@@ -156,7 +161,12 @@ int SipfFileUploadComplete(const char *file_id)
 
     /* リクエストするよ */
     static struct http_response http_res;
-    ret = SipfClientHttpRunRequest(CONFIG_SIPF_FILE_REQ_URL_HOST, &req, 3 * MSEC_PER_SEC, &http_res, true);
+#ifndef CONFIG_SIPF_CONNECTOR_DISABLE_SSL
+    bool ssl = true;
+#else
+    bool ssl = false;
+#endif
+    ret = SipfClientHttpRunRequest(CONFIG_SIPF_FILE_REQ_URL_HOST, &req, 3 * MSEC_PER_SEC, &http_res, ssl);
     if (ret < 0) {
         LOG_ERR("%s(): SipfClientHttpRunRequest() failed: ret=%d", __func__, ret);
         return ret;
@@ -369,6 +379,7 @@ int SipfFileDownload(const char *file_id, uint8_t *buff, size_t sz_download, sip
         LOG_ERR("SipfFileRequestDownloadURL() failed: %d", ret);
         return ret;
     }
+
     // URLを分割
     char *prot = NULL;
     char *host = NULL;
@@ -384,6 +395,7 @@ int SipfFileDownload(const char *file_id, uint8_t *buff, size_t sz_download, sip
         LOG_ERR("SipfClientHttpParseURL(): invalid result.");
         return -1;
     }
+
     int sec_tag;
     if (strcmp(prot, "https") == 0) {
         sec_tag = TLS_SEC_TAG;
@@ -401,7 +413,8 @@ int SipfFileDownload(const char *file_id, uint8_t *buff, size_t sz_download, sip
     };
 
     // Download Client初期化
-    struct download_client dc;
+    static struct download_client dc;
+    memset(&dc, 0, sizeof(struct download_client));
     dl_cb = cb; // FLAGMENTダウンロードイベントで呼ぶコールバック関数を設定
     ret = download_client_init(&dc, download_client_callback);
     if (ret != 0) {
