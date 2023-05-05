@@ -5,7 +5,7 @@
  */
 #include <zephyr/logging/log.h>
 
-LOG_MODULE_DECLARE(sipf);
+LOG_MODULE_REGISTER(sipf);
 
 #include "sipf/sipf_auth.h"
 #include "sipf/sipf_client_http.h"
