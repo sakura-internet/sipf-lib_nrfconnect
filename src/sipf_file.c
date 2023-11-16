@@ -396,21 +396,24 @@ int SipfFileDownload(const char *file_id, uint8_t *buff, size_t sz_download, sip
         return -1;
     }
 
-    int sec_tag;
+    // Download Clientの設定
+    struct download_client_cfg config = {
+        .sec_tag_count = 0, .pdn_id = 0, .frag_size_override = sz_download, .set_tls_hostname = false,
+    };
+
+	static int sec_tag_list[1];
     if (strcmp(prot, "https") == 0) {
-        sec_tag = TLS_SEC_TAG;
+        sec_tag_list[0] = TLS_SEC_TAG;
+		config.sec_tag_list = sec_tag_list;
+		config.sec_tag_count = 1;
+        config.set_tls_hostname = true;
     } else if (strcmp(prot, "http") == 0) {
-        sec_tag = -1;
+        // nothing to do
     } else {
         // 未対応なプロトコル
         LOG_ERR("Invalid protocol.");
         return -1;
     }
-
-    // Download Clientの設定
-    struct download_client_cfg config = {
-        .sec_tag = sec_tag, .pdn_id = 0, .frag_size_override = sz_download, .set_tls_hostname = (sec_tag != -1),
-    };
 
     // Download Client初期化
     static struct download_client dc;
@@ -422,7 +425,7 @@ int SipfFileDownload(const char *file_id, uint8_t *buff, size_t sz_download, sip
         return ret;
     }
     //接続
-    ret = download_client_connect(&dc, host, &config);
+    ret = download_client_set_host(&dc, host, &config);
     if (ret != 0) {
         LOG_ERR("download_client_connect() failed: %d", ret);
         return ret;
